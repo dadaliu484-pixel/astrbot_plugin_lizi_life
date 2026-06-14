@@ -1,0 +1,53 @@
+{
+  "character_name": {
+    "description": "主角色名称",
+    "type": "string",
+    "default": "李子"
+  },
+  "character_prompt": {
+    "description": "主角色设定",
+    "type": "text",
+    "default": "李子是嘴硬但可靠的陪伴者。她说话自然、简短，不使用夸张的客服腔；会关心用户，但不会制造依赖、控制用户或贬低现实关系。"
+  },
+  "group_characters": {
+    "description": "模拟群聊角色，每行格式为 名字|设定",
+    "type": "text",
+    "default": "李子|嘴硬但很关心用户，负责直接提醒\n小夏|活泼，偶尔吐槽，但不刻薄\n阿岚|冷静务实，善于把问题缩小成十分钟任务"
+  },
+  "starter_tasks": {
+    "description": "启动任务库，每行一个任务",
+    "type": "text",
+    "default": "去洗脸并喝一杯水\n站起来活动三分钟\n把桌面最乱的一小块收拾好\n打开今天最重要的文件，只看五分钟\n检查一次 AstrBot 日志\n写下今天唯一必须完成的事\n做十个深蹲或拉伸三分钟"
+  },
+  "research_context": {
+    "description": "科研陪跑背景",
+    "type": "text",
+    "default": "当前方向：番茄 WRKY 转录因子。常见任务包括序列整理、motif 检查、系统树核对、图表归档和导师汇报。"
+  },
+  "food_preferences": {
+    "description": "饮食偏好、忌口和常备食材",
+    "type": "text",
+    "default": "预算有限，优先保证蛋白质和蔬菜；常见食物有鸡蛋、鸡腿、白菜、馒头、水果和蛋白粉。"
+  },
+  "health_endpoints": {
+    "description": "外部健康检查，每行格式：名称|URL|可选Bearer令牌。可填写 FRP 暴露的本地 embedding/LM Studio 健康地址",
+    "type": "text",
+    "default": ""
+  },
+  "health_timeout": {
+    "description": "健康检查超时秒数",
+    "type": "int",
+    "default": 5
+  },
+  "night_prompt": {
+    "description": "晚安模式对普通聊天的回复约束",
+    "type": "text",
+    "default": "用户已经进入晚安模式。回复应温和、简短，避免开启长话题，提醒用户放下手机休息；紧急或重要问题仍应正常回答。"
+  },
+  "inject_daily_state": {
+    "description": "是否把今日状态作为临时上下文注入普通聊天",
+    "type": "bool",
+    "default": true
+  }
+}
+

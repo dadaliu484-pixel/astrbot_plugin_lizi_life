@@ -1,0 +1,15 @@
+name: astrbot_plugin_lizi_life
+display_name: 李子生活陪伴
+desc: 轻量虚拟陪伴、每日状态、日记、多人群聊、饮食建议、任务成就、科研陪跑和服务器状态。
+short_desc: 把陪伴、生活启动和服务器小管家放进一个插件。
+version: 0.1.0
+author: Codex
+repo: https://github.com/OWNER/astrbot_plugin_lizi_life
+astrbot_version: ">=4.9.2,<5"
+support_platforms:
+  - aiocqhttp
+  - wecom
+  - wecom_ai_bot
+  - weixin_official_account
+  - weixin_oc
+  - satori
