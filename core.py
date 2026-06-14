@@ -52,17 +52,6 @@ def choose_task(tasks: list[str], day: date, user_key: str, draw_index: int) -> 
     }
 
 
-def parse_group_characters(raw: str) -> list[tuple[str, str]]:
-    result = []
-    for line in raw.splitlines():
-        if "|" not in line:
-            continue
-        name, prompt = line.split("|", 1)
-        if name.strip() and prompt.strip():
-            result.append((name.strip(), prompt.strip()))
-    return result
-
-
 def parse_health_endpoints(raw: str) -> list[tuple[str, str, str]]:
     result = []
     for line in raw.splitlines():

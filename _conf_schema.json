@@ -5,14 +5,20 @@
     "default": "李子"
   },
   "character_prompt": {
-    "description": "主角色设定",
+    "description": "插件内部生成日记时使用的补充角色设定，不会默认覆盖 AstrBot 主聊天人格",
     "type": "text",
     "default": "李子是嘴硬但可靠的陪伴者。她说话自然、简短，不使用夸张的客服腔；会关心用户，但不会制造依赖、控制用户或贬低现实关系。"
   },
-  "group_characters": {
-    "description": "模拟群聊角色，每行格式为 名字|设定",
-    "type": "text",
-    "default": "李子|嘴硬但很关心用户，负责直接提醒\n小夏|活泼，偶尔吐槽，但不刻薄\n阿岚|冷静务实，善于把问题缩小成十分钟任务"
+  "role_knowledge_bases": {
+    "description": "为 /群聊 和 /今日事件 提供角色设定、人物关系与世界观资料的 AstrBot 知识库",
+    "type": "list",
+    "default": [],
+    "_special": "select_knowledgebase"
+  },
+  "knowledge_top_m": {
+    "description": "每次从角色知识库取回的最终片段数量",
+    "type": "int",
+    "default": 6
   },
   "starter_tasks": {
     "description": "启动任务库，每行一个任务",
@@ -42,6 +48,11 @@
   "inject_daily_state": {
     "description": "是否把今日状态作为临时上下文注入普通聊天",
     "type": "bool",
-    "default": true
+    "default": false
+  },
+  "inject_character_prompt": {
+    "description": "是否把插件 character_prompt 注入普通聊天。建议关闭并使用 AstrBot 自带人格，避免人设冲突",
+    "type": "bool",
+    "default": false
   }
 }

@@ -17,7 +17,6 @@ from .core import (
     achievements_for,
     choose_task,
     make_daily_state,
-    parse_group_characters,
     parse_health_endpoints,
     stable_rng,
 )
@@ -74,6 +73,32 @@ class LiziLifePlugin(Star):
             logger.warning("lizi_life LLM call failed: %s", exc)
             return fallback
 
+    async def _role_knowledge(self, query: str) -> tuple[str | None, str | None]:
+        selected_kbs = self.config.get("role_knowledge_bases", [])
+        if not isinstance(selected_kbs, list) or not selected_kbs:
+            return None, "请先在插件配置中选择“角色知识库”。"
+        kb_manager = getattr(self.context, "kb_manager", None)
+        if kb_manager is None:
+            return None, "当前 AstrBot 版本不支持插件知识库检索，请先升级 AstrBot。"
+        kb_names = []
+        for selected in selected_kbs:
+            selected = str(selected)
+            kb = await kb_manager.get_kb(selected)
+            kb_names.append(kb.kb.kb_name if kb else selected)
+        top_m = max(1, min(int(self.config.get("knowledge_top_m", 6)), 20))
+        try:
+            result = await kb_manager.retrieve(
+                query=query,
+                kb_names=kb_names,
+                top_m_final=top_m,
+            )
+        except Exception as exc:
+            logger.warning("lizi_life knowledge retrieval failed: %s", exc)
+            return None, f"角色知识库检索失败：{type(exc).__name__}"
+        if not result or not result.get("context_text"):
+            return None, "角色知识库中没有检索到相关设定，请补充人物卡或关系资料。"
+        return result["context_text"], None
+
     def _state_text(self, event: AstrMessageEvent, target_day: date | None = None) -> str:
         target_day = target_day or date.today()
         name = self.config.get("character_name", "李子")
@@ -109,16 +134,19 @@ class LiziLifePlugin(Star):
         if not message.strip():
             yield event.plain_result("用法：/群聊 我今天又刷了两个小时视频")
             return
-        characters = parse_group_characters(self.config.get("group_characters", ""))
-        cast = "\n".join(f"- {name}：{desc}" for name, desc in characters)
-        fallback = "\n".join(
-            f"{name}：先把这件事缩小成一个现在能做的小动作。"
-            for name, _ in characters[:3]
+        knowledge, error = await self._role_knowledge(
+            "检索李子、小夏、阿岚等角色的人物设定、说话方式、彼此关系、共同经历。"
+            f"本次群聊主题：{message}"
         )
+        if error:
+            yield event.plain_result(error)
+            return
+        fallback = "角色群聊生成失败，请检查当前聊天模型。"
         prompt = (
-            "请模拟一个自然的中文小群聊。不要写旁白，不要使用 Markdown 列表，每人说一到两句，"
-            "既要有性格差异，也要最终给出一个十分钟内可执行的动作。不要羞辱或控制用户。\n\n"
-            f"角色：\n{cast}\n\n用户说：{message}"
+            "请严格依据知识库资料模拟一段自然的中文小群聊。只允许使用知识库中有依据的角色、"
+            "性格和关系；资料未说明的经历不要编造。不要写旁白，不使用 Markdown 列表，"
+            "每人说一到两句。可以给建议，但不要羞辱、控制用户或制造情感依赖。\n\n"
+            f"{knowledge}\n\n用户说：{message}"
         )
         text = await self._ask(event, prompt, fallback)
         await self._activity(event, f"群聊主题：{message}")
@@ -251,14 +279,21 @@ class LiziLifePlugin(Star):
         if cached:
             yield event.plain_result(cached)
             return
-        characters = parse_group_characters(self.config.get("group_characters", ""))
-        cast = "、".join(name for name, _ in characters) or "李子、小夏、阿岚"
         rng = stable_rng(day_key, self._user_key(event), "event")
         seed_hint = rng.choice(("吃饭", "熬夜", "服务器", "出门", "整理房间"))
-        fallback = f"小夏问起你今天有没有好好{seed_hint}，李子嘴上说不知道，转头却认真记了下来。"
+        knowledge, error = await self._role_knowledge(
+            "检索角色人物设定、人物关系、日常互动边界和世界观。"
+            f"适合生成与“{seed_hint}”有关的小事件。"
+        )
+        if error:
+            yield event.plain_result(error)
+            return
+        fallback = "今日事件生成失败，请检查当前聊天模型。"
         prompt = (
-            f"为角色 {cast} 写一个 50 到 100 字的日常小事件，主题与“{seed_hint}”有关。"
-            "温暖、克制、有生活感，不写宏大剧情，不制造嫉妒或控制关系。"
+            f"严格依据下面的知识库资料写一个 50 到 100 字的日常小事件，主题与“{seed_hint}”有关。"
+            "只使用资料中存在的角色和关系，资料未说明的共同经历不要编造。"
+            "内容温暖、克制、有生活感，不写宏大剧情，不制造嫉妒、控制或依赖关系。\n\n"
+            f"{knowledge}"
         )
         text = await self._ask(event, prompt, fallback)
         async with self._lock(self._user_key(event)):
@@ -338,9 +373,9 @@ class LiziLifePlugin(Star):
     ) -> None:
         """在普通聊天中临时注入晚安模式和可选的今日状态。"""
         data = await self._get_user(event)
-        parts = [
-            "角色设定：" + self.config.get("character_prompt", "")
-        ]
+        parts = []
+        if self.config.get("inject_character_prompt", False):
+            parts.append("角色设定：" + self.config.get("character_prompt", ""))
         if data.get("sleep_mode"):
             parts.append(self.config.get("night_prompt", "请简短提醒用户休息。"))
         if self.config.get("inject_daily_state", True):

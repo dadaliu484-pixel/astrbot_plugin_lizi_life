@@ -2,7 +2,7 @@ name: astrbot_plugin_lizi_life
 display_name: 李子生活陪伴
 desc: 轻量虚拟陪伴、每日状态、日记、多人群聊、饮食建议、任务成就和服务器状态。
 short_desc: 把陪伴、生活启动和服务器小管家放进一个插件。
-version: 0.2.0
+version: 0.3.0
 author: dadaliu484-pixel
 repo: https://github.com/dadaliu484-pixel/astrbot_plugin_lizi_life
 astrbot_version: ">=4.9.2,<5"

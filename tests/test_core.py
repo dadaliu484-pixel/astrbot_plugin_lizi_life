@@ -5,7 +5,6 @@ from core import (
     achievements_for,
     choose_task,
     make_daily_state,
-    parse_group_characters,
     parse_health_endpoints,
 )
 
@@ -22,11 +21,7 @@ class CoreTests(unittest.TestCase):
         self.assertIn(task["content"], {"喝水", "洗脸"})
         self.assertGreater(task["minutes"], 0)
 
-    def test_parsers_ignore_bad_lines(self):
-        self.assertEqual(
-            parse_group_characters("李子|嘴硬\n坏行"),
-            [("李子", "嘴硬")],
-        )
+    def test_health_parser_ignores_bad_lines(self):
         self.assertEqual(
             parse_health_endpoints("Embedding|https://x/health|abc\nbad"),
             [("Embedding", "https://x/health", "abc")],
