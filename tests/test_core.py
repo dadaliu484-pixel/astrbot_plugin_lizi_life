@@ -37,11 +37,10 @@ class CoreTests(unittest.TestCase):
             {
                 "completed_count": 10,
                 "diary_count": 1,
-                "used_research": True,
                 "checked_server": True,
             }
         )
-        self.assertEqual(len(items), 6)
+        self.assertEqual(len(items), 5)
 
 
 if __name__ == "__main__":

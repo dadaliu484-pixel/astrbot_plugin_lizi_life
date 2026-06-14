@@ -19,11 +19,6 @@
     "type": "text",
     "default": "去洗脸并喝一杯水\n站起来活动三分钟\n把桌面最乱的一小块收拾好\n打开今天最重要的文件，只看五分钟\n检查一次 AstrBot 日志\n写下今天唯一必须完成的事\n做十个深蹲或拉伸三分钟"
   },
-  "research_context": {
-    "description": "科研陪跑背景",
-    "type": "text",
-    "default": "当前方向：番茄 WRKY 转录因子。常见任务包括序列整理、motif 检查、系统树核对、图表归档和导师汇报。"
-  },
   "food_preferences": {
     "description": "饮食偏好、忌口和常备食材",
     "type": "text",
@@ -50,4 +45,3 @@
     "default": true
   }
 }
-

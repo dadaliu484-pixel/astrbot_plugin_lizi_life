@@ -84,9 +84,6 @@ def achievements_for(data: dict) -> list[str]:
         achievements.append("不是偶然：累计完成 10 个任务")
     if diary_count >= 1:
         achievements.append("留下今天：生成第一篇日记")
-    if data.get("used_research"):
-        achievements.append("科研启动：完成一次科研任务拆解")
     if data.get("checked_server"):
         achievements.append("系统在线：完成一次服务器巡检")
     return achievements
-

@@ -94,7 +94,7 @@ class LiziLifePlugin(Star):
             "可用命令\n"
             "/状态\n/群聊 内容\n/吃什么 [预算]\n/抽任务\n/完成\n/成就\n"
             "/记录 内容\n/日记\n/昨日回忆\n/今日事件\n/睡觉\n/起床\n"
-            "/今天科研 [主题]\n/status"
+            "/status"
         )
 
     @filter.command("状态", alias={"今日状态"})
@@ -212,9 +212,11 @@ class LiziLifePlugin(Star):
             return f"{day_key} 还没有留下足够的记录。可以先用 /记录 写下一件事。"
         activity_text = "\n".join(f"{item['time']} {item['text']}" for item in entries)
         name = self.config.get("character_name", "李子")
+        character_prompt = self.config.get("character_prompt", "")
         prompt = (
             f"你是{name}。根据下面的事件写一篇 80 到 160 字的私人日记。"
             "语气自然、有一点嘴硬但温柔，只总结已有事实，不编造聊天和经历，不渲染依赖。\n\n"
+            f"角色设定：{character_prompt}\n"
             f"日期：{day_key}\n事件：\n{activity_text}"
         )
         fallback = f"{day_key}\n今天记住了这些事：\n" + "\n".join(
@@ -252,7 +254,7 @@ class LiziLifePlugin(Star):
         characters = parse_group_characters(self.config.get("group_characters", ""))
         cast = "、".join(name for name, _ in characters) or "李子、小夏、阿岚"
         rng = stable_rng(day_key, self._user_key(event), "event")
-        seed_hint = rng.choice(("吃饭", "熬夜", "科研", "服务器", "出门", "整理房间"))
+        seed_hint = rng.choice(("吃饭", "熬夜", "服务器", "出门", "整理房间"))
         fallback = f"小夏问起你今天有没有好好{seed_hint}，李子嘴上说不知道，转头却认真记了下来。"
         prompt = (
             f"为角色 {cast} 写一个 50 到 100 字的日常小事件，主题与“{seed_hint}”有关。"
@@ -285,24 +287,6 @@ class LiziLifePlugin(Star):
             await self._save_user(event, data)
         await self._activity(event, "结束晚安模式")
         yield event.plain_result("早。先喝口水，别急着把今天想得太重。")
-
-    @filter.command("今天科研", alias={"wrky", "导师汇报"})
-    async def research(self, event: AstrMessageEvent, topic: str = ""):
-        """把科研压力拆成一个小任务。"""
-        context = self.config.get("research_context", "")
-        fallback = "今天只做一步：整理一个文件夹，把序列、motif 图和系统树截图分别放好。限时十分钟。"
-        prompt = (
-            "你是务实的科研陪跑助手。把任务拆成今天只做一步、10 到 25 分钟可完成的动作。"
-            "不要假装知道实验结果，不替用户编造数据。输出：今日一步、完成标准、卡住时怎么办。\n"
-            f"科研背景：{context}\n用户补充：{topic or '没有补充'}"
-        )
-        text = await self._ask(event, prompt, fallback)
-        async with self._lock(self._user_key(event)):
-            data = await self._get_user(event)
-            data["used_research"] = True
-            await self._save_user(event, data)
-        await self._activity(event, f"科研陪跑：{topic or '默认任务'}")
-        yield event.plain_result(text)
 
     async def _external_health(self) -> list[str]:
         endpoints = parse_health_endpoints(self.config.get("health_endpoints", ""))
@@ -354,7 +338,9 @@ class LiziLifePlugin(Star):
     ) -> None:
         """在普通聊天中临时注入晚安模式和可选的今日状态。"""
         data = await self._get_user(event)
-        parts = []
+        parts = [
+            "角色设定：" + self.config.get("character_prompt", "")
+        ]
         if data.get("sleep_mode"):
             parts.append(self.config.get("night_prompt", "请简短提醒用户休息。"))
         if self.config.get("inject_daily_state", True):
@@ -370,4 +356,3 @@ class LiziLifePlugin(Star):
 
     async def terminate(self):
         self._locks.clear()
-
