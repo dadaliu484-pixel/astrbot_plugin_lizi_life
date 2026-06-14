@@ -20,8 +20,6 @@
 
 插件要求 AstrBot `>= 4.9.2`。安装后在插件配置中填写角色、任务、饮食偏好和健康检查地址，然后重载插件。
 
-发布前请将 `metadata.yaml` 中的 `OWNER` 替换为实际 GitHub 用户名。
-
 ## FRP 健康检查
 
 `health_endpoints` 每行填写：
